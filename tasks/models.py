@@ -2,7 +2,7 @@ from django.db import models
 
 # Create your models here.
 
-from accounts.models import User
+from django.contrib.auth.models import User
 from typing import List
 from django.db import models
 
@@ -13,7 +13,7 @@ class Employer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.user.username
+        return self.user
 
 
 class Contractor(models.Model):
@@ -22,7 +22,7 @@ class Contractor(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.user.username
+        return self.user
 
 
 class Task(models.Model):
