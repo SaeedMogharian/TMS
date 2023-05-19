@@ -1,0 +1,24 @@
+body, h1 {
+    font-family: 'Lalezar', cursive;
+}
+
+body, html {
+    height: 100%
+}
+
+.bgimg {
+    background-image: url('https://www.w3schools.com/w3images/forestbridge.jpg');
+    min-height: 100%;
+    background-position: center;
+    background-size: cover;
+}
+
+.btn {
+    font-weight: 700;
+    border-radius: 4px;
+    color: white;
+}
+
+.form-input{
+    border: 1px solid #6a1a21; border-radius: 5px;
+}
