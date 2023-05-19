@@ -1,28 +1,24 @@
-from django.db import models
-
 # Create your models here.
 
 from django.contrib.auth.models import User
-from typing import List
 from django.db import models
 
 
-class Employer(models.Model):
-    """person who can create tasks."""
+class UserDetail(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    class UserType(models.TextChoices):
+        EMPLOYER = "E", "صاحب کار"
+        CONTRACTOR = "C", "جویای کار"
+
+    type = models.CharField(
+        max_length=1,
+        default=UserType.CONTRACTOR,
+        choices=UserType.choices,
+    )
 
     def __str__(self):
-        return self.user
-
-
-class Contractor(models.Model):
-    """person who can accept and do the tasks"""
-
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.user
+        return str(self.user) + ' | ' + str(self.type)
 
 
 class Task(models.Model):
@@ -32,21 +28,25 @@ class Task(models.Model):
         DONE = "D", "انجام شده"
 
     title = models.CharField(max_length=60)
-    owner = models.ForeignKey(Employer, on_delete=models.CASCADE)
+    value = models.PositiveIntegerField()
+    time = models.PositiveSmallIntegerField()
+    owner = models.ForeignKey(UserDetail, on_delete=models.CASCADE, related_name='owner')
+    description = models.TextField(blank=True)
+
     state = models.CharField(
         max_length=1,
         default=TaskStatus.PENDING,
         choices=TaskStatus.choices,
     )
-    cost = models.PositiveIntegerField()
-    time_period = models.PositiveSmallIntegerField()
-    description = models.TextField(blank=True)
+
     created_at = models.DateField(auto_now_add=True)
 
     assigned_contractor = models.ForeignKey(
-        Contractor,
+        UserDetail,
         on_delete=models.SET_NULL,
         null=True,
+        blank=True,
+        related_name='contractor'
     )
 
     @property
@@ -56,24 +56,24 @@ class Task(models.Model):
     def __str__(self):
         return self.title
 
-    @classmethod
-    def get_all_data_to_show(cls) -> List:
-        """return tasks data for previewing"""
-        result = []
-        tasks = list(cls.objects.all().order_by("-created_at").values())
+    # @classmethod
+    # def get_all_data_to_show(cls) -> List:
+    #     """return tasks data for previewing"""
+    #     result = []
+    #     tasks = list(cls.objects.all().order_by("-created_at").values())
+    #
+    #     for task in tasks:
+    #         owner = str(User.objects.get(pk=task.get("owner_id")))
+    #         state = Task.objects.get(id=task.get("id")).get_state_display()
+    #         task["owner"] = owner
+    #         task["state"] = state
+    #         result.append(task)
+    #     return result
 
-        for task in tasks:
-            owner = str(Employer.objects.get(pk=task.get("owner_id")))
-            state = Task.objects.get(id=task.get("id")).get_state_display()
-            task["owner"] = owner
-            task["state"] = state
-            result.append(task)
-        return result
-
-    def assign_contractor(self, contractor: Contractor) -> None:
-        self.assigned_contractor = contractor
-        self.state = Task.TaskStatus.ASSIGNED
-        self.save()
+    # def assign_contractor(self, contractor: User) -> None:
+    #     self.assigned_contractor = contractor
+    #     self.state = Task.TaskStatus.ASSIGNED
+    #     self.save()
 
     def done(self) -> None:
         self.state = Task.TaskStatus.DONE
